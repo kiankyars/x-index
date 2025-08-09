@@ -16,7 +16,8 @@ export async function GET(req: Request) {
   const bearerToken = process.env.X_BEARER_TOKEN ?? "";
 
   let displayName = `@${handle}`;
-  let hIndex = 0;
+  let hLikes = 0;
+  let hRTs = 0;
 
   try {
     const tweets: Tweet[] = bearerToken
@@ -33,7 +34,8 @@ export async function GET(req: Request) {
       displayName = `${user.name} (@${user.username})`;
     }
     const result = computeXIndexForWindow(tweets, windowVal);
-    hIndex = result.hIndex;
+    hLikes = result.hIndexLikes;
+    hRTs = result.hIndexRetweets;
   } catch {
     // keep defaults
   }
@@ -58,9 +60,9 @@ export async function GET(req: Request) {
         <div style={{ position: "absolute", inset: 0, opacity: 0.08, background: "radial-gradient(1000px 400px at 50% -100px, #ffffff 0, transparent 70%)" }} />
         <div style={{ fontSize: 56, opacity: 0.95 }}>X-index</div>
         <div style={{ fontSize: 40, marginTop: 12 }}>{displayName}</div>
-        <div style={{ marginTop: 24, display: "flex", gap: 16, alignItems: "baseline" }}>
-          <span>H-index:</span>
-          <b style={{ fontSize: 80 }}>{hIndex}</b>
+        <div style={{ marginTop: 24, display: "flex", gap: 24, alignItems: "baseline", fontSize: 40 }}>
+          <div>Likes H: <b style={{ fontSize: 80 }}>{hLikes}</b></div>
+          <div>RTs H: <b style={{ fontSize: 80 }}>{hRTs}</b></div>
           <span style={{ fontSize: 36, opacity: 0.8 }}>({windowVal})</span>
         </div>
         <div style={{ marginTop: 24, fontSize: 28, opacity: 0.7 }}>x-index.app</div>

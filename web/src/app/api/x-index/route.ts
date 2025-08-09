@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
           username: profile.username,
           name: profile.name,
           avatar_url: profile.profileImageUrl ?? null,
-          h_index: result.hIndex,
+          h_index: 0,
           h_index_likes: result.hIndexLikes,
           h_index_retweets: result.hIndexRetweets,
           time_window: windowParam,

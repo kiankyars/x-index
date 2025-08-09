@@ -10,12 +10,11 @@ export type Tweet = {
 export type XIndexWindow = "all" | "30d" | "90d";
 
 export type XIndexResult = {
-  hIndex: number;
   hIndexLikes: number;
   hIndexRetweets: number;
   countedTweetIds: string[];
-  topTweets: Tweet[]; // tweets that count toward h, sorted by engagement desc
-  engagementsSorted: number[]; // sorted desc
+  topTweets: Tweet[]; // tweets that count toward likes H, sorted by likes desc
+  engagementsSorted: number[]; // total engagements sorted desc (for chart)
 };
 
 function parseWindowToSinceDate(window: XIndexWindow, now = new Date()): Date | null {
@@ -37,18 +36,7 @@ export function computeXIndex(tweets: Tweet[]): XIndexResult {
     tweet: t,
     engagement: (t.likeCount || 0) + (t.retweetCount || 0),
   }));
-
   withEngagement.sort((a, b) => b.engagement - a.engagement);
-
-  let h = 0;
-  for (let i = 0; i < withEngagement.length; i += 1) {
-    const rank = i + 1;
-    if (withEngagement[i].engagement >= rank) {
-      h = rank;
-    } else {
-      break;
-    }
-  }
 
   // Likes-only H-index
   const likesSorted = [...tweets]
@@ -70,9 +58,8 @@ export function computeXIndex(tweets: Tweet[]): XIndexResult {
     if (rtsSorted[i].val >= rank) hRTs = rank; else break;
   }
 
-  const top = withEngagement.slice(0, h).map((e) => e.tweet);
+  const top = likesSorted.slice(0, hLikes).map((e) => e.tweet);
   return {
-    hIndex: h,
     hIndexLikes: hLikes,
     hIndexRetweets: hRTs,
     countedTweetIds: top.map((t) => t.id),

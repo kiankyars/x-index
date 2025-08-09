@@ -30,10 +30,11 @@ export async function POST(_request: NextRequest) {
           username,
           name: username,
           avatar_url: null,
-          h_index: result.hIndex,
-          window: windowVal,
+          h_index_likes: result.hIndexLikes,
+          h_index_retweets: result.hIndexRetweets,
+          time_window: windowVal,
           computed_at: new Date().toISOString(),
-        }, { onConflict: "username,window" });
+        }, { onConflict: "username,time_window" });
         if (upErr) console.error("Recompute upsert error", upErr.message);
       }
     }

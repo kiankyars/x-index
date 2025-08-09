@@ -88,15 +88,18 @@ export default function Home() {
           value={username}
           onChange={(e) => setUsername(e.target.value.replace(/^@/, ""))}
         />
-        <select
-          className="rounded-md border border-foreground/15 bg-background px-3 py-2"
-          value={windowVal}
-          onChange={(e) => setWindowVal(e.target.value as "all" | "30d" | "90d")}
-        >
-          <option value="all">All time</option>
-          <option value="30d">Last 30d</option>
-          <option value="90d">Last 90d</option>
-        </select>
+        <div className="inline-flex rounded-md border border-foreground/15 overflow-hidden">
+          {(["all","30d","90d"] as const).map((opt) => (
+            <button
+              key={opt}
+              type="button"
+              onClick={() => setWindowVal(opt)}
+              className={`px-3 py-2 text-sm ${windowVal===opt?"bg-foreground text-background":"bg-background text-foreground/80 hover:bg-foreground/5"}`}
+            >
+              {opt === "all" ? "All time" : opt}
+            </button>
+          ))}
+        </div>
         <button
           type="submit"
           className="rounded-md bg-foreground text-background px-4 py-2 font-medium disabled:opacity-50"
@@ -111,7 +114,7 @@ export default function Home() {
       {data && "result" in data && (
         <div className="w-full max-w-2xl space-y-6">
           <div className="text-lg">
-            <span className="opacity-70">@{data.username}</span> H-index: <span className="font-semibold">{data.result.hIndex}</span> ({data.window}) · Likes: <span className="font-semibold">{data.result.hIndexLikes}</span> · RTs: <span className="font-semibold">{data.result.hIndexRetweets}</span>
+            <span className="opacity-70">@{data.username}</span> Likes H: <span className="font-semibold">{data.result.hIndexLikes}</span> · RTs H: <span className="font-semibold">{data.result.hIndexRetweets}</span> ({data.window})
           </div>
           <div>
             <a

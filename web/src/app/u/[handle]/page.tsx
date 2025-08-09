@@ -25,9 +25,7 @@ export default async function UserPage(props: Props) {
           <div className="text-2xl font-semibold">{user.name}</div>
           <div className="opacity-70">@{user.username}</div>
         </div>
-        <div>
-          H-index: <span className="font-semibold">{result.hIndex}</span> ({windowVal}) · Likes: <span className="font-semibold">{result.hIndexLikes}</span> · RTs: <span className="font-semibold">{result.hIndexRetweets}</span>
-        </div>
+        <div>Likes H: <span className="font-semibold">{result.hIndexLikes}</span> · RTs H: <span className="font-semibold">{result.hIndexRetweets}</span> ({windowVal})</div>
         <Link className="underline" href={`/?u=${encodeURIComponent(handle)}&w=${windowVal}`}>Back</Link>
       </div>
     );
