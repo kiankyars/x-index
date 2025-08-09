@@ -36,7 +36,10 @@ export default function Home() {
     try {
       const res = await fetch(`/api/x-index?username=${encodeURIComponent(username)}&window=${windowVal}`, { cache: "no-store" });
       const json = (await res.json()) as ApiResponse;
-      if (!res.ok) throw new Error((json as any)?.error || "Request failed");
+      if (!res.ok) {
+        const errMsg = (json && "error" in json && typeof json.error === "string") ? json.error : "Request failed";
+        throw new Error(errMsg);
+      }
       setData(json);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Unknown error");
@@ -86,7 +89,7 @@ export default function Home() {
         <select
           className="rounded-md border border-foreground/15 bg-background px-3 py-2"
           value={windowVal}
-          onChange={(e) => setWindowVal(e.target.value as any)}
+          onChange={(e) => setWindowVal(e.target.value as "all" | "30d" | "90d")}
         >
           <option value="all">All time</option>
           <option value="30d">Last 30d</option>

@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { computeXIndexForWindow, type XIndexWindow } from "@/lib/xIndex";
+import { computeXIndexForWindow, type XIndexWindow, type Tweet } from "@/lib/xIndex";
 import { fetchRecentTweets, getUserByUsername } from "@/lib/xClient";
 
 export const runtime = "edge";
@@ -19,7 +19,7 @@ export async function GET(req: Request) {
   let hIndex = 0;
 
   try {
-    const tweets = bearerToken
+    const tweets: Tweet[] = bearerToken
       ? await fetchRecentTweets({ username: handle, bearerToken })
       : Array.from({ length: 40 }).map((_, i) => ({
           id: String(i + 1),
@@ -32,7 +32,7 @@ export async function GET(req: Request) {
       const user = await getUserByUsername(handle, bearerToken);
       displayName = `${user.name} (@${user.username})`;
     }
-    const result = computeXIndexForWindow(tweets as any, windowVal);
+    const result = computeXIndexForWindow(tweets, windowVal);
     hIndex = result.hIndex;
   } catch {
     // keep defaults
