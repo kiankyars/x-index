@@ -1,20 +1,35 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+MVP for x-index.
 
 ## Getting Started
 
-First, run the development server:
+Run dev server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Env (`.env.local`):
+
+```
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=replace-with-random-32+ chars
+
+# Twitter (X) OAuth 2.0
+TWITTER_CLIENT_ID=replace
+TWITTER_CLIENT_SECRET=replace
+
+# Optional app-level bearer token for read-only calls when user not signed in
+X_BEARER_TOKEN=replace
+
+# Supabase (optional for leaderboard/caching)
+SUPABASE_URL=replace
+SUPABASE_SERVICE_ROLE_KEY=replace
+```
+
+Notes:
+- OAuth 2.0 app on X must have scopes: tweet.read, users.read, offline.access, like.read, list.read
+- In production, set the callback URL in your X app to `${NEXTAUTH_URL}/api/auth/callback/twitter`
+- If you omit Supabase vars, features degrade gracefully (no leaderboard cache, recompute disabled)
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 

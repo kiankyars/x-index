@@ -38,9 +38,7 @@ export async function getUserByUsername(username: string, bearerToken: string): 
 // Requires Elevated/Basic tier for user tweets endpoint.
 // If token is missing/unavailable, caller should fall back to mock.
 export async function fetchRecentTweets({ username, maxCount = 200, bearerToken }: FetchTweetsParams): Promise<Tweet[]> {
-  if (!bearerToken) {
-    throw new Error("Missing X API bearer token");
-  }
+  if (!bearerToken) throw new Error("Missing X API bearer token");
 
   // 1) Resolve user id by username
   const userRes = await fetch(`https://api.twitter.com/2/users/by/username/${encodeURIComponent(username)}`, {
