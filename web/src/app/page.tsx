@@ -111,6 +111,16 @@ export default function Home() {
           <div className="text-lg">
             <span className="opacity-70">@{data.username}</span> H-index: <span className="font-semibold">{data.result.hIndex}</span> ({data.window})
           </div>
+          <div>
+            <a
+              className="inline-block rounded-md bg-[#1DA1F2] text-white px-4 py-2 text-sm font-medium hover:opacity-90"
+              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`My X-index is ${data.result.hIndex}. What’s yours?`)}&url=${encodeURIComponent(`${window.location.origin}/u/${data.username}?w=${data.window}`)}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Tweet my X-index
+            </a>
+          </div>
           {chart}
           <div className="space-y-3">
             <div className="text-sm text-foreground/80">Top tweets contributing to H-index</div>

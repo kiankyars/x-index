@@ -52,11 +52,17 @@ export async function GET(req: Request) {
           color: "#ededed",
           fontSize: 64,
           padding: 48,
+          position: "relative",
         }}
       >
-        <div style={{ fontSize: 56, opacity: 0.9 }}>X-index</div>
+        <div style={{ position: "absolute", inset: 0, opacity: 0.08, background: "radial-gradient(1000px 400px at 50% -100px, #ffffff 0, transparent 70%)" }} />
+        <div style={{ fontSize: 56, opacity: 0.95 }}>X-index</div>
         <div style={{ fontSize: 40, marginTop: 12 }}>{displayName}</div>
-        <div style={{ marginTop: 24 }}>H-index: <b>{hIndex}</b> ({windowVal})</div>
+        <div style={{ marginTop: 24, display: "flex", gap: 16, alignItems: "baseline" }}>
+          <span>H-index:</span>
+          <b style={{ fontSize: 80 }}>{hIndex}</b>
+          <span style={{ fontSize: 36, opacity: 0.8 }}>({windowVal})</span>
+        </div>
         <div style={{ marginTop: 24, fontSize: 28, opacity: 0.7 }}>x-index.app</div>
       </div>
     ),

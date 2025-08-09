@@ -1,0 +1,7 @@
+{
+  "crons": [
+    { "path": "/api/recompute", "schedule": "0 8 * * *" }
+  ]
+}
+
+

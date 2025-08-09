@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { computeXIndexForWindow, type XIndexWindow } from "@/lib/xIndex";
-import { fetchRecentTweets } from "@/lib/xClient";
+import { fetchRecentTweets, getUserByUsername } from "@/lib/xClient";
+import { getSupabaseAdmin } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
 
@@ -33,6 +34,27 @@ export async function GET(request: NextRequest) {
     }
 
     const result = computeXIndexForWindow(tweets, windowParam);
+
+    // Persist best-effort to Supabase if configured
+    try {
+      const supabase = getSupabaseAdmin();
+      const profile = bearerToken ? await getUserByUsername(username, bearerToken) : { name: username, username, profileImageUrl: undefined };
+      const { error } = await supabase.from("scores").upsert(
+        {
+          username: profile.username,
+          name: profile.name,
+          avatar_url: profile.profileImageUrl ?? null,
+          h_index: result.hIndex,
+          window: windowParam,
+          computed_at: new Date().toISOString(),
+        },
+        { onConflict: "username,window" }
+      );
+      if (error) console.error("Supabase upsert error", error);
+    } catch (e) {
+      // ignore if supabase not configured
+    }
+
     return Response.json({ username, window: windowParam, result });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Unknown error";
