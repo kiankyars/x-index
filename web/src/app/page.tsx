@@ -7,6 +7,8 @@ type ApiResponse = {
   window: "all" | "30d" | "90d";
   result: {
     hIndex: number;
+    hIndexLikes: number;
+    hIndexRetweets: number;
     engagementsSorted: number[];
     countedTweetIds: string[];
     topTweets: Array<{
@@ -109,7 +111,7 @@ export default function Home() {
       {data && "result" in data && (
         <div className="w-full max-w-2xl space-y-6">
           <div className="text-lg">
-            <span className="opacity-70">@{data.username}</span> H-index: <span className="font-semibold">{data.result.hIndex}</span> ({data.window})
+            <span className="opacity-70">@{data.username}</span> H-index: <span className="font-semibold">{data.result.hIndex}</span> ({data.window}) · Likes: <span className="font-semibold">{data.result.hIndexLikes}</span> · RTs: <span className="font-semibold">{data.result.hIndexRetweets}</span>
           </div>
           <div>
             <a

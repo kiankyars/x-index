@@ -48,6 +48,8 @@ export async function GET(request: NextRequest) {
           name: profile.name,
           avatar_url: profile.profileImageUrl ?? null,
           h_index: result.hIndex,
+          h_index_likes: result.hIndexLikes,
+          h_index_retweets: result.hIndexRetweets,
           window: windowParam,
           computed_at: new Date().toISOString(),
         },

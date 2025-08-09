@@ -11,6 +11,8 @@ export type XIndexWindow = "all" | "30d" | "90d";
 
 export type XIndexResult = {
   hIndex: number;
+  hIndexLikes: number;
+  hIndexRetweets: number;
   countedTweetIds: string[];
   topTweets: Tweet[]; // tweets that count toward h, sorted by engagement desc
   engagementsSorted: number[]; // sorted desc
@@ -48,9 +50,31 @@ export function computeXIndex(tweets: Tweet[]): XIndexResult {
     }
   }
 
+  // Likes-only H-index
+  const likesSorted = [...tweets]
+    .map((t) => ({ tweet: t, val: t.likeCount || 0 }))
+    .sort((a, b) => b.val - a.val);
+  let hLikes = 0;
+  for (let i = 0; i < likesSorted.length; i += 1) {
+    const rank = i + 1;
+    if (likesSorted[i].val >= rank) hLikes = rank; else break;
+  }
+
+  // Retweets-only H-index
+  const rtsSorted = [...tweets]
+    .map((t) => ({ tweet: t, val: t.retweetCount || 0 }))
+    .sort((a, b) => b.val - a.val);
+  let hRTs = 0;
+  for (let i = 0; i < rtsSorted.length; i += 1) {
+    const rank = i + 1;
+    if (rtsSorted[i].val >= rank) hRTs = rank; else break;
+  }
+
   const top = withEngagement.slice(0, h).map((e) => e.tweet);
   return {
     hIndex: h,
+    hIndexLikes: hLikes,
+    hIndexRetweets: hRTs,
     countedTweetIds: top.map((t) => t.id),
     topTweets: top,
     engagementsSorted: withEngagement.map((e) => e.engagement),
