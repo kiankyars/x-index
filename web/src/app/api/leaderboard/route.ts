@@ -12,8 +12,8 @@ export async function GET(request: NextRequest) {
     const supabase = getSupabaseAdmin();
     const { data, error } = await supabase
       .from("scores")
-      .select("username, name, avatar_url, h_index, h_index_likes, h_index_retweets, window, computed_at")
-      .eq("window", windowParam)
+      .select("username, name, avatar_url, h_index, h_index_likes, h_index_retweets, time_window, computed_at")
+      .eq("time_window", windowParam)
       .order("h_index", { ascending: false })
       .limit(limit);
 

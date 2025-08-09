@@ -50,10 +50,10 @@ export async function GET(request: NextRequest) {
           h_index: result.hIndex,
           h_index_likes: result.hIndexLikes,
           h_index_retweets: result.hIndexRetweets,
-          window: windowParam,
+          time_window: windowParam,
           computed_at: new Date().toISOString(),
         },
-        { onConflict: "username,window" }
+        { onConflict: "username,time_window" }
       );
       if (error) console.error("Supabase upsert error", error);
     } catch (e) {
