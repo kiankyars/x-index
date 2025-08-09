@@ -1,103 +1,136 @@
-import Image from "next/image";
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+
+type ApiResponse = {
+  username: string;
+  window: "all" | "30d" | "90d";
+  result: {
+    hIndex: number;
+    engagementsSorted: number[];
+    countedTweetIds: string[];
+    topTweets: Array<{
+      id: string;
+      text: string;
+      createdAt: string;
+      likeCount: number;
+      retweetCount: number;
+      url?: string;
+    }>;
+  };
+} | { error: string };
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [username, setUsername] = useState("");
+  const [windowVal, setWindowVal] = useState<"all" | "30d" | "90d">("all");
+  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState<ApiResponse | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  async function runQuery(e?: React.FormEvent) {
+    e?.preventDefault();
+    if (!username) return;
+    setLoading(true);
+    setError(null);
+    setData(null);
+    try {
+      const res = await fetch(`/api/x-index?username=${encodeURIComponent(username)}&window=${windowVal}`, { cache: "no-store" });
+      const json = (await res.json()) as ApiResponse;
+      if (!res.ok) throw new Error((json as any)?.error || "Request failed");
+      setData(json);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Unknown error");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const chart = useMemo(() => {
+    const engagements = (data && "result" in data) ? data.result.engagementsSorted : [];
+    if (!engagements.length) return null;
+    const max = Math.max(...engagements);
+    return (
+      <div className="w-full max-w-2xl space-y-2">
+        <div className="text-sm text-foreground/80">Engagement distribution (likes+RT, desc)</div>
+        <div className="space-y-1">
+          {engagements.slice(0, 50).map((v, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <div className="w-8 text-right text-xs text-foreground/60">{i + 1}</div>
+              <div className="h-2 bg-foreground/10 rounded" style={{ width: `${max ? (v / max) * 100 : 0}%` }} />
+              <div className="text-xs text-foreground/60">{v}</div>
+            </div>
+          ))}
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+      </div>
+    );
+  }, [data]);
+
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const u = url.searchParams.get("u");
+    const w = url.searchParams.get("w") as "all" | "30d" | "90d" | null;
+    if (u) setUsername(u);
+    if (w) setWindowVal(w);
+  }, []);
+
+  return (
+    <div className="font-sans min-h-screen p-8 sm:p-16 flex flex-col items-center gap-8">
+      <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">X-index</h1>
+      <form onSubmit={runQuery} className="flex flex-col sm:flex-row gap-3 w-full max-w-2xl">
+        <input
+          className="flex-1 rounded-md border border-foreground/15 bg-background px-3 py-2 outline-none focus:ring-2 ring-foreground/20"
+          placeholder="Enter @username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value.replace(/^@/, ""))}
+        />
+        <select
+          className="rounded-md border border-foreground/15 bg-background px-3 py-2"
+          value={windowVal}
+          onChange={(e) => setWindowVal(e.target.value as any)}
         >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+          <option value="all">All time</option>
+          <option value="30d">Last 30d</option>
+          <option value="90d">Last 90d</option>
+        </select>
+        <button
+          type="submit"
+          className="rounded-md bg-foreground text-background px-4 py-2 font-medium disabled:opacity-50"
+          disabled={loading || !username}
         >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+          {loading ? "Computing…" : "Compute"}
+        </button>
+      </form>
+
+      {error && <div className="text-red-500 text-sm">{error}</div>}
+
+      {data && "result" in data && (
+        <div className="w-full max-w-2xl space-y-6">
+          <div className="text-lg">
+            <span className="opacity-70">@{data.username}</span> H-index: <span className="font-semibold">{data.result.hIndex}</span> ({data.window})
+          </div>
+          {chart}
+          <div className="space-y-3">
+            <div className="text-sm text-foreground/80">Top tweets contributing to H-index</div>
+            <ul className="space-y-3">
+              {data.result.topTweets.map((t) => (
+                <li key={t.id} className="rounded-md border border-foreground/10 p-3">
+                  <div className="text-sm mb-1 line-clamp-3">{t.text}</div>
+                  <div className="text-xs opacity-70 flex items-center gap-3">
+                    <span>{new Date(t.createdAt).toLocaleDateString()}</span>
+                    <span>❤ {t.likeCount}</span>
+                    <span>↻ {t.retweetCount}</span>
+                    {t.url && (
+                      <a className="underline" href={t.url} target="_blank" rel="noreferrer">
+                        View
+                      </a>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
