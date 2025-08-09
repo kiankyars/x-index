@@ -13,25 +13,7 @@ export default async function UserPage(props: Props) {
   const windowVal = (search.w as XIndexWindow) || "all";
 
   const bearerToken = process.env.X_BEARER_TOKEN ?? "";
-  if (!bearerToken) {
-    // show mock page when no token
-    const mockTweets = Array.from({ length: 50 }).map((_, i) => ({
-      id: String(i + 1),
-      text: `Mock tweet ${i + 1}`,
-      createdAt: new Date(Date.now() - i * 86400000).toISOString(),
-      likeCount: Math.floor(Math.random() * 50),
-      retweetCount: Math.floor(Math.random() * 30),
-      url: `https://x.com/${handle}/status/${i + 1}`,
-    }));
-    const result = computeXIndexForWindow(mockTweets, windowVal);
-    return (
-      <div className="font-sans min-h-screen p-8 sm:p-16 flex flex-col items-center gap-8">
-        <h1 className="text-2xl font-semibold">@{handle}</h1>
-        <div>H-index: <span className="font-semibold">{result.hIndex}</span> ({windowVal})</div>
-        <Link className="underline" href={`/?u=${encodeURIComponent(handle)}&w=${windowVal}`}>Try another</Link>
-      </div>
-    );
-  }
+  if (!bearerToken) throw new Error("Server not configured with X_BEARER_TOKEN");
 
   try {
     const user = await getUserByUsername(handle, bearerToken);

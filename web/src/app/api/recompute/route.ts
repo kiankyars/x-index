@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export async function POST(_request: NextRequest) {
   const bearerToken = process.env.X_BEARER_TOKEN ?? "";
   if (!bearerToken) {
-    return Response.json({ error: "X API token not configured" }, { status: 400 });
+    return Response.json({ error: "Server not configured with X_BEARER_TOKEN" }, { status: 500 });
   }
   try {
     const supabase = getSupabaseAdmin();

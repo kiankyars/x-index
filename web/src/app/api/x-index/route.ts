@@ -2,8 +2,6 @@ import { NextRequest } from "next/server";
 import { computeXIndexForWindow, type XIndexWindow } from "@/lib/xIndex";
 import { fetchRecentTweets, getUserByUsername } from "@/lib/xClient";
 import { getSupabaseAdmin } from "@/lib/supabase";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -18,9 +16,10 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const session = await getServerSession(authOptions);
-    const tokenFromUser = (session as unknown as { access_token?: string })?.access_token;
-    const bearerToken = tokenFromUser || process.env.X_BEARER_TOKEN || "";
+    const bearerToken = process.env.X_BEARER_TOKEN || "";
+    if (!bearerToken) {
+      return Response.json({ error: "Server not configured with X_BEARER_TOKEN" }, { status: 500 });
+    }
     let tweets;
     if (bearerToken) {
       tweets = await fetchRecentTweets({ username, bearerToken, maxCount: maxCountParam ? Number(maxCountParam) : 200 });
@@ -42,7 +41,7 @@ export async function GET(request: NextRequest) {
     // Persist best-effort to Supabase if configured
     try {
       const supabase = getSupabaseAdmin();
-      const profile = bearerToken ? await getUserByUsername(username, bearerToken) : { name: username, username, profileImageUrl: undefined };
+      const profile = await getUserByUsername(username, bearerToken);
       const { error } = await supabase.from("scores").upsert(
         {
           username: profile.username,

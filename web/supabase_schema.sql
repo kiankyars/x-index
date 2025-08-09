@@ -31,15 +31,3 @@ create table if not exists public.scores (
   computed_at timestamp with time zone default now(),
   period text default 'all'
 );
-
--- Tweets cache (optional)
-create table if not exists public.tweets (
-  id text primary key,
-  x_user_id text not null,
-  like_count int not null default 0,
-  retweet_count int not null default 0,
-  created_at timestamp with time zone
-);
-
-
-
