@@ -6,6 +6,34 @@ export type FetchTweetsParams = {
   bearerToken: string;
 };
 
+export type XUser = {
+  id: string;
+  name: string;
+  username: string;
+  profileImageUrl?: string;
+};
+
+export async function getUserByUsername(username: string, bearerToken: string): Promise<XUser> {
+  if (!bearerToken) throw new Error("Missing X API bearer token");
+  const res = await fetch(
+    `https://api.twitter.com/2/users/by/username/${encodeURIComponent(username)}?user.fields=profile_image_url,name,username`,
+    { headers: { Authorization: `Bearer ${bearerToken}` }, cache: "no-store" }
+  );
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to resolve user: ${res.status} ${text}`);
+  }
+  const json = await res.json();
+  const d = json?.data;
+  if (!d?.id) throw new Error("User not found");
+  return {
+    id: d.id,
+    name: d.name,
+    username: d.username,
+    profileImageUrl: d.profile_image_url,
+  };
+}
+
 // Minimal X API v2 client using recent tweets from a user.
 // Requires Elevated/Basic tier for user tweets endpoint.
 // If token is missing/unavailable, caller should fall back to mock.
