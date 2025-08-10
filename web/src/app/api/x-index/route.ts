@@ -2,6 +2,8 @@ import { NextRequest } from "next/server";
 import { computeXIndexForWindow, type XIndexWindow } from "@/lib/xIndex";
 import { fetchRecentTweets, getUserByUsername } from "@/lib/xClient";
 import { getSupabaseAdmin } from "@/lib/supabase";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -16,9 +18,10 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const bearerToken = process.env.X_BEARER_TOKEN || "";
+    const session = await getServerSession(authOptions);
+    const bearerToken = (session as unknown as { access_token?: string })?.access_token || "";
     if (!bearerToken) {
-      return Response.json({ error: "Server not configured with X_BEARER_TOKEN" }, { status: 500 });
+      return Response.json({ error: "Sign in required" }, { status: 401 });
     }
     let tweets;
     if (bearerToken) {
@@ -47,7 +50,6 @@ export async function GET(request: NextRequest) {
           username: profile.username,
           name: profile.name,
           avatar_url: profile.profileImageUrl ?? null,
-          h_index: 0,
           h_index_likes: result.hIndexLikes,
           h_index_retweets: result.hIndexRetweets,
           time_window: windowParam,

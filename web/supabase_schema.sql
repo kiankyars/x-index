@@ -13,6 +13,5 @@ create table if not exists public.scores (
 );
 
 -- Indexes for leaderboard queries
-create index if not exists scores_time_window_hindex_idx on public.scores (time_window, h_index desc);
 create index if not exists scores_time_window_hindex_likes_idx on public.scores (time_window, h_index_likes desc);
 create index if not exists scores_time_window_hindex_retweets_idx on public.scores (time_window, h_index_retweets desc);

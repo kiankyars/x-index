@@ -13,7 +13,7 @@ export default async function UserPage(props: Props) {
   const windowVal = (search.w as XIndexWindow) || "all";
 
   const bearerToken = process.env.X_BEARER_TOKEN ?? "";
-  if (!bearerToken) throw new Error("Server not configured with X_BEARER_TOKEN");
+  if (!bearerToken) throw new Error("Sign in required");
 
   try {
     const user = await getUserByUsername(handle, bearerToken);

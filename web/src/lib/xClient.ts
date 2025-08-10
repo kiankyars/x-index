@@ -56,7 +56,7 @@ export async function fetchRecentTweets({ username, maxCount = 200, bearerToken 
   // 2) Fetch tweets with public metrics
   // Note: API has pagination. We'll fetch first page only for MVP.
   const tweetsRes = await fetch(
-    `https://api.twitter.com/2/users/${userId}/tweets?max_results=${Math.min(100, maxCount)}&tweet.fields=public_metrics,created_at`,
+    `https://api.twitter.com/2/users/${userId}/tweets?max_results=${Math.min(100, maxCount)}&tweet.fields=public_metrics,created_at&exclude=retweets`,
     {
       headers: { Authorization: `Bearer ${bearerToken}` },
       cache: "no-store",
